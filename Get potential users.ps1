@@ -1,9 +1,14 @@
-﻿$user = "steven.tobar"
+﻿cls
 
-$firstname,$lastname =$user.Split(".")
+$username = Read-Host -Prompt "Please enter a username in the format first.name"
+
+
+$firstname,$lastname = $username.Split(".")
 
 $fullname = $firstname + " " + $lastname
 
+echo $fullname
+
 $verifyuser = Get-ADUser -filter {name -eq $fullname} |select -expandproperty samaccountname 
 
-echo "The user's username is actually: $verifyuser"
+echo "Their username is actually: $verifyuser"

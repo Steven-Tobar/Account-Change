@@ -1,12 +1,25 @@
 ﻿#Created by Steven Tobar 4/6/18
 
-function Get-ValidUser ($validname)
+
+function Get-ValidUser #($validname)
 {
   #Gets the SamAccountName for the user in AD
-   $firstname,$lastname = $name.Split(".")
-   $fullname = $firstname + " " + $lastname
-   $verifyuser = Get-ADUser -filter {name -eq $fullname} |select -expandproperty samaccountname 
-   echo "Their username is actually: $verifyuser `n"
+    <#if ($name -eq " ")
+    {
+        "The username can't be blank."
+    }
+    elseif($name -notcontains ".")
+    {
+        "Please type the username with the correct format."
+    }
+    else
+    { #>
+        $firstname,$lastname = $name.Split(".")
+        $fullname = $firstname + " " + $lastname
+        $verifyuser = Get-ADUser -filter {name -eq $fullname} |select -expandproperty samaccountname 
+        "This username does not exist.`n"
+        echo "Their username is actually: $verifyuser `n"
+    #}
 }
 
 function Get-UserProperties($properties)
@@ -39,7 +52,7 @@ Clear-Host
 Do 
 {
     $doesntexist = $false
-    $name = Read-Host -Prompt "Please enter a username in the format first.name"
+    $global:name = Read-Host -Prompt "Please enter a username in the format first.name"
     Try
     {   
         Get-UserProperties $name 
@@ -51,7 +64,6 @@ Do
      {
       #Catches the exception errors for users that don't exist and provides the tech with a valid username to enter.
        cls
-       "This username does not exist.`n"
        Get-ValidUser($name)
        $doesntexist = $true    
      }

@@ -14,11 +14,12 @@ function Get-ValidUser #($validname)
     }
     else
     { #>
+        #Assumes no name mispellings 
         $firstname,$lastname = $name.Split(".")
         $fullname = $firstname + " " + $lastname
-        $verifyuser = Get-ADUser -filter {name -eq $fullname} |select -expandproperty samaccountname 
+        $verifyuser = Get-ADUser -filter {name -eq $fullname} |select -expandproperty samaccountname
         "This username does not exist.`n"
-        echo "Their username is actually: $verifyuser `n"
+        echo "Their username is actually: $verifyuser `n"    
     #}
 }
 
@@ -63,7 +64,7 @@ Do
     catch [Microsoft.ActiveDirectory.Management.ADIdentityNotFoundException],[Microsoft.ActiveDirectory.Management.Commands.GetADUser]
      {
       #Catches the exception errors for users that don't exist and provides the tech with a valid username to enter.
-       cls
+       Clear-Host
        Get-ValidUser($name)
        $doesntexist = $true    
      }

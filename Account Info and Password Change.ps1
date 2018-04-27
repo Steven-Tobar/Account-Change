@@ -17,7 +17,7 @@ function Get-ValidUser()
         #Assumes no name mispellings 
         $firstname,$lastname = $name.Split(".")
         $fullname = $firstname + " " + $lastname
-        $validuser = Get-ADUser -filter {name -eq $fullname} |select -expandproperty samaccountname
+        $validuser = Get-ADUser -filter {name -eq $fullname} |Select-Object -expandproperty samaccountname
         Write-Output "Their username is actually: $validuser `n"
     #}
 }
@@ -29,7 +29,7 @@ function Get-UserProperties
     $script:userproperties = get-aduser $user -properties * | Select-Object -Property accountexpirationdate,lockedout,passwordexpired,passwordlastset,whencreated    
 }
     
-function Check-LockState
+function Get-LockState
 {  #Takes the user and checks to see if they are locked out of their account; if they are, the tech is prompted to change that.
     Get-UserProperties $name
     if ($userproperties.lockedout -eq $true )
@@ -38,7 +38,7 @@ function Check-LockState
     }
 }
 
-function Check-PasswordState
+function Get-PasswordState
 {  #Checks to see if the user's password is expired; if true the tech is prompted to give a new password.
     Get-UserProperties $name
     if ($userproperties.passwordexpired -eq $true)
@@ -57,8 +57,8 @@ Do
     {   
         Get-UserProperties $name 
         Write-Output $userproperties
-        Check-LockState 
-        Check-PasswordState   
+        Get-LockState 
+        Get-PasswordState   
     }
     catch [Microsoft.ActiveDirectory.Management.ADIdentityNotFoundException],[Microsoft.ActiveDirectory.Management.Commands.GetADUser]
      {

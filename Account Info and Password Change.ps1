@@ -1,20 +1,27 @@
-﻿#Created by Steven Tobar 4/6/18
+﻿
 
+<#
+.Synopsis
+   Gets the user's properties and allows the technician to make changes
+.DESCRIPTION
+   When given a username, the script will find the user's properties. If the account is locked out or if the password is expired, it'll prompt the tech to fix it.
+.NOTES
+    Created by Steven Tobar 4/6/18
+#>
 
-function Get-ValidUser
+function Get-ValidUser ()
 {   [cmdletbinding()]
     param( 
         [parameter(
             Mandatory = $true, 
-            HelpMessage = "Please enter a username in the format first.last name"
+            HelpMessage = "Please enter a username in the format first.lastname" 
         )] 
-        [string]$Identity
+        [string]$script:Identity
     )
-        Write-Output $Identity
         $firstname,$lastname = $Identity.Split(".")
         $fullname = $firstname + " " + $lastname
         $validuser = Get-ADUser -filter {name -eq $fullname} |Select-Object -expandproperty samaccountname
-        Write-Output "Their username is actually: $validuser `n"
+        #Write-Output "Their username is actually: $validuser `n"
 }
 
 function Get-UserProperties
@@ -25,7 +32,7 @@ function Get-UserProperties
     
 function Get-LockState
 {  #Takes the user and checks to see if they are locked out of their account; if they are, the tech is prompted to change that.
-    Get-UserProperties $name
+    Get-UserProperties $Identity
     if ($userproperties.lockedout -eq $true)
     {
         Unlock-ADAccount $name -Confirm
@@ -45,10 +52,10 @@ function Get-PasswordState
 Clear-Host
 
 Do 
-{   #$script:name = Read-Host -Prompt "Please enter a username in the format first.name"
+{   $script:name = Read-Host -Prompt "Please enter a username in the format first.name"
     $doesntexist = $false
     Try
-    {   
+    {   Get-ValidUser $name
         Get-UserProperties  
         Write-Output $userproperties
         Get-LockState 

@@ -24,12 +24,16 @@ function Get-ValidUser()
 
 function Get-UserProperties
 {
-    param($user)
+    param(
+    [cmdletbinding()]
+    [parameter(Mandatory = $true, HelpMessage = "Enter a username in the format first.last name")] 
+    [string]$name
+    )
    #Get basic user properties that can help the tech find out what's wrong with a user account.
     $script:userproperties = get-aduser $user -properties * | Select-Object -Property accountexpirationdate,lockedout,passwordexpired,passwordlastset,whencreated    
 }
     
-function Check-LockState
+function Get-LockState
 {  #Takes the user and checks to see if they are locked out of their account; if they are, the tech is prompted to change that.
     Get-UserProperties $name
     if ($userproperties.lockedout -eq $true )
@@ -38,7 +42,7 @@ function Check-LockState
     }
 }
 
-function Check-PasswordState
+function Get-PasswordState
 {  #Checks to see if the user's password is expired; if true the tech is prompted to give a new password.
     Get-UserProperties $name
     if ($userproperties.passwordexpired -eq $true)

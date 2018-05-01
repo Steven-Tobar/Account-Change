@@ -17,7 +17,7 @@ function Get-ValidUser()
         #Assumes no name mispellings 
         $firstname,$lastname = $name.Split(".")
         $fullname = $firstname + " " + $lastname
-        $validuser = Get-ADUser -filter {name -eq $fullname} |select -expandproperty samaccountname
+        $validuser = Get-ADUser -filter {name -eq $fullname} |Select-Object -expandproperty samaccountname
         Write-Output "Their username is actually: $validuser `n"
     #}
 }

@@ -24,7 +24,11 @@ function Get-ValidUser()
 
 function Get-UserProperties
 {
-    param($user)
+    param(
+    [cmdletbinding()]
+    [parameter(Mandatory = $true, HelpMessage = "Enter a username in the format first.last name")] 
+    [string]$name
+    )
    #Get basic user properties that can help the tech find out what's wrong with a user account.
     $script:userproperties = get-aduser $user -properties * | Select-Object -Property accountexpirationdate,lockedout,passwordexpired,passwordlastset,whencreated    
 }

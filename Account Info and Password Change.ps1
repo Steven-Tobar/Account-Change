@@ -1,42 +1,32 @@
 ﻿#Created by Steven Tobar 4/6/18
 
 
-function Get-ValidUser()
-{
-  #Gets the SamAccountName for the user in AD
-    <#if ($name -eq " ")
-    {
-        "The username can't be blank."
-    }
-    elseif($name -notcontains ".")
-    {
-        "Please type the username with the correct format."
-    }
-    else
-    { #>
-        #Assumes no name mispellings 
-        $firstname,$lastname = $name.Split(".")
+function Get-ValidUser
+{   [cmdletbinding()]
+    param( 
+        [parameter(
+            Mandatory = $true, 
+            HelpMessage = "Please enter a username in the format first.last name"
+        )] 
+        [string]$Identity
+    )
+        Write-Output $Identity
+        $firstname,$lastname = $Identity.Split(".")
         $fullname = $firstname + " " + $lastname
         $validuser = Get-ADUser -filter {name -eq $fullname} |Select-Object -expandproperty samaccountname
         Write-Output "Their username is actually: $validuser `n"
-    #}
 }
 
 function Get-UserProperties
 {
-    param(
-    [cmdletbinding()]
-    [parameter(Mandatory = $true, HelpMessage = "Enter a username in the format first.last name")] 
-    [string]$name
-    )
    #Get basic user properties that can help the tech find out what's wrong with a user account.
-    $script:userproperties = get-aduser $user -properties * | Select-Object -Property accountexpirationdate,lockedout,passwordexpired,passwordlastset,whencreated    
+    $script:userproperties = get-aduser $Identity -properties * | Select-Object -Property accountexpirationdate,lockedout,passwordexpired,passwordlastset,whencreated    
 }
     
 function Get-LockState
 {  #Takes the user and checks to see if they are locked out of their account; if they are, the tech is prompted to change that.
     Get-UserProperties $name
-    if ($userproperties.lockedout -eq $true )
+    if ($userproperties.lockedout -eq $true)
     {
         Unlock-ADAccount $name -Confirm
     }
@@ -55,11 +45,11 @@ function Get-PasswordState
 Clear-Host
 
 Do 
-{   $script:name = Read-Host -Prompt "Please enter a username in the format first.name"
+{   #$script:name = Read-Host -Prompt "Please enter a username in the format first.name"
     $doesntexist = $false
     Try
     {   
-        Get-UserProperties $name 
+        Get-UserProperties  
         Write-Output $userproperties
         Get-LockState 
         Get-PasswordState   

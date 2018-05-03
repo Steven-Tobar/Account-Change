@@ -10,7 +10,7 @@
 #>
 
 function Get-ValidUser ()
-{   [cmdletbinding()]
+{  <# [cmdletbinding()]
     param( 
         [parameter(
             Mandatory = $true, 
@@ -18,21 +18,22 @@ function Get-ValidUser ()
         )] 
         [string]$script:Identity
     )
-        $firstname,$lastname = $Identity.Split(".")
-        $fullname = $firstname + " " + $lastname
+     #>   
+        $fullname = $name.Replace("."," ")
         $validuser = Get-ADUser -filter {name -eq $fullname} |Select-Object -expandproperty samaccountname
-        #Write-Output "Their username is actually: $validuser `n"
+        Write-Output "Their username is actually: $validuser `n"
+
 }
 
 function Get-UserProperties
 {
    #Get basic user properties that can help the tech find out what's wrong with a user account.
-    $script:userproperties = get-aduser $Identity -properties * | Select-Object -Property accountexpirationdate,lockedout,passwordexpired,passwordlastset,whencreated    
+    $script:userproperties = get-aduser $name -properties * | Select-Object -Property accountexpirationdate,lockedout,passwordexpired,passwordlastset,whencreated    
 }
     
 function Get-LockState
 {  #Takes the user and checks to see if they are locked out of their account; if they are, the tech is prompted to change that.
-    Get-UserProperties $Identity
+    Get-UserProperties $name
     if ($userproperties.lockedout -eq $true)
     {
         Unlock-ADAccount $name -Confirm
@@ -55,7 +56,7 @@ Do
 {   $script:name = Read-Host -Prompt "Please enter a username in the format first.name"
     $doesntexist = $false
     Try
-    {   Get-ValidUser $name
+    {   
         Get-UserProperties  
         Write-Output $userproperties
         Get-LockState 

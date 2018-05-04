@@ -4,61 +4,62 @@
 .Synopsis
    Gets the user's properties and allows the technician to make changes
 .DESCRIPTION
-   When given a username, the script will find the user's properties. If the account is locked out or if the password is expired, it'll prompt the tech to fix it.
+   When given a username, the script will find the user's properties. If the account is locked out or if the password is expired, it'll prompt the tech to fix it. 
 .NOTES
     Created by Steven Tobar 4/6/18
+    Assumes a few things: Correct first and last name and no random jumble
 #>
 
-function Get-ValidUser ()
-{  <# [cmdletbinding()]
-    param( 
-        [parameter(
-            Mandatory = $true, 
-            HelpMessage = "Please enter a username in the format first.lastname" 
-        )] 
-        [string]$script:Identity
-    )
-     #>   
-        $fullname = $name.Replace("."," ")
-        $validuser = Get-ADUser -filter {name -eq $fullname} |Select-Object -expandproperty samaccountname
-        Write-Output "Their username is actually: $validuser `n"
 
+function Get-ValidUser()
+{  
+    param
+    ( 
+        [string]$script:Identity
+    )    
+        $FullName = $Identity.Replace("."," ")
+        $ValidUser = Get-ADUser -filter {name -eq $FullName} |Select-Object -expandproperty samaccountname
+        Write-Output "Their username is actually: $ValidUser `n"
 }
 
-function Get-UserProperties
+function Get-UserProperties()   
 {
-   #Get basic user properties that can help the tech find out what's wrong with a user account.
-    $script:userproperties = get-aduser $name -properties * | Select-Object -Property accountexpirationdate,lockedout,passwordexpired,passwordlastset,whencreated    
+    param
+    ( 
+        [string]$script:ADUser
+    )
+     
+    $script:UserProperties = get-aduser $ADUser -properties * | Select-Object -Property accountexpirationdate,lockedout,passwordexpired,passwordlastset,whencreated    
 }
     
 function Get-LockState
-{  #Takes the user and checks to see if they are locked out of their account; if they are, the tech is prompted to change that.
-    Get-UserProperties $name
-    if ($userproperties.lockedout -eq $true)
+{  
+    Get-UserProperties $Name
+    if ($UserProperties.lockedout -eq $true)
     {
-        Unlock-ADAccount $name -Confirm
+        Unlock-ADAccount $Name -Confirm
     }
 }
 
 function Get-PasswordState
-{  #Checks to see if the user's password is expired; if true the tech is prompted to give a new password.
-    Get-UserProperties $name
-    if ($userproperties.passwordexpired -eq $true)
+{
+    Get-UserProperties $Name
+    if ($UserProperties.passwordexpired -eq $true)
     {
-        $newpassword = Read-Host -Prompt "Please enter the new password" -AsSecureString
-        Set-ADAccountPassword $name -NewPassword $newpassword        
+        $NewPassword = Read-Host -Prompt "Please enter the new password" -AsSecureString
+        Set-ADAccountPassword $Name -NewPassword $NewPassword        
     }    
 }
 
 Clear-Host
 
 Do 
-{   $script:name = Read-Host -Prompt "Please enter a username in the format first.name"
+{   $script:Name = Read-Host -Prompt "Please enter a username in the format first.name"
     $doesntexist = $false
     Try
     {   
-        Get-UserProperties  
-        Write-Output $userproperties
+        Get-UserProperties $Name  
+        Write-Output $UserProperties
         Get-LockState 
         Get-PasswordState   
     }
@@ -66,12 +67,12 @@ Do
      {
       #Catches the exception errors for users that don't exist and provides the tech with a valid username to enter.
        Clear-Host
-       Get-ValidUser($name)
-       $doesntexist = $true    
+       Get-ValidUser($Name)
+       $DoesntExist = $True    
      }
 }
 
-while ($doesntexist)
+while ($DoesntExist)
 
 
 

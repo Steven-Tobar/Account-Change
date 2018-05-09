@@ -47,8 +47,10 @@ function Set-PasswordState
 Clear-Host
 
 Do 
-{   $Name = Read-Host -Prompt "Please enter a username in the format first.name"
+{   
+    $Name = Read-Host -Prompt "Please enter a username in the format first.name"
     $doesntexist = $false
+    
     Try
     {   
         Get-UserProperties $Name  | Set-LockState

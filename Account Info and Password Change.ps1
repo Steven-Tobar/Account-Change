@@ -24,17 +24,11 @@ function Get-ValidUser()
 
 function Get-UserProperties()   
 {
-    param
-    ( 
-        [string]$script:ADUser
-    )
-     
     $script:UserProperties = get-aduser $ADUser -properties * | Select-Object -Property accountexpirationdate,lockedout,passwordexpired,passwordlastset,whencreated    
 }
     
 function Set-LockState
 {  
-    Get-UserProperties $Name
     if ($UserProperties.lockedout -eq $true)
     {
         Unlock-ADAccount $Name -Confirm
@@ -43,7 +37,6 @@ function Set-LockState
 
 function Set-PasswordState
 {
-    Get-UserProperties $Name
     if ($UserProperties.passwordexpired -eq $true)
     {
         $NewPassword = Read-Host -Prompt "Please enter the new password" -AsSecureString
@@ -54,14 +47,13 @@ function Set-PasswordState
 Clear-Host
 
 Do 
-{   $script:Name = Read-Host -Prompt "Please enter a username in the format first.name"
+{   $Name = Read-Host -Prompt "Please enter a username in the format first.name"
     $doesntexist = $false
     Try
     {   
-        Get-UserProperties $Name  
-        Write-Output $UserProperties
-        Set-LockState 
-        Set-PasswordState   
+        Get-UserProperties $Name  | Set-LockState
+        Write-Output $UserProperties 
+        Get-UserProperties $Name | Set-PasswordState   
     }
     catch [Microsoft.ActiveDirectory.Management.ADIdentityNotFoundException],[Microsoft.ActiveDirectory.Management.Commands.GetADUser]
      {

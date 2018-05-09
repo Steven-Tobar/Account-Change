@@ -32,7 +32,7 @@ function Get-UserProperties()
     $script:UserProperties = get-aduser $ADUser -properties * | Select-Object -Property accountexpirationdate,lockedout,passwordexpired,passwordlastset,whencreated    
 }
     
-function Get-LockState
+function Set-LockState
 {  
     Get-UserProperties $Name
     if ($UserProperties.lockedout -eq $true)
@@ -41,7 +41,7 @@ function Get-LockState
     }
 }
 
-function Get-PasswordState
+function Set-PasswordState
 {
     Get-UserProperties $Name
     if ($UserProperties.passwordexpired -eq $true)
@@ -60,8 +60,8 @@ Do
     {   
         Get-UserProperties $Name  
         Write-Output $UserProperties
-        Get-LockState 
-        Get-PasswordState   
+        Set-LockState 
+        Set-PasswordState   
     }
     catch [Microsoft.ActiveDirectory.Management.ADIdentityNotFoundException],[Microsoft.ActiveDirectory.Management.Commands.GetADUser]
      {

@@ -10,21 +10,33 @@
     Assumes a few things: Correct first and last name and no random jumble
 #>
 
-
-function Get-ValidUser()
+function Get-NewPassword
+{
+    $NewPassword = Read-Host -Prompt "Please enter the new password" -AsSecureString
+    $script:ConfirmNewPassword = Read-host -Prompt "Confirm new password" -AsSecureString
+    $NewPasswordText = [Runtime.InteropServices.Marshal]::PtrToStringAuto([Runtime.InteropServices.Marshal]::SecureStringToBSTR($NewPassword))
+    $ConfirmNewPasswordText = [Runtime.InteropServices.Marshal]::PtrToStringAuto([Runtime.InteropServices.Marshal]::SecureStringToBSTR($ConfirmNewPassword))
+    
+    if ($NewPasswordText -cne $ConfirmNewPasswordText)
+    {
+        Write-Output "The New and Confirm password must match. Please re-enter them."
+    }  
+    
+}
+function Get-ValidUserName()
 {  
     param
     ( 
         [string]$script:Identity
     )    
         $FullName = $Identity.Replace("."," ")
-        $ValidUser = Get-ADUser -filter {name -eq $FullName} |Select-Object -expandproperty samaccountname
+        $ValidUser = Get-ADUser -filter {name -eq $FullName} | Select-Object -expandproperty samaccountname
         Write-Output "Their username is actually: $ValidUser `n"
 }
 
 function Get-UserProperties()   
 {
-    $script:UserProperties = get-aduser $ADUser -properties * | Select-Object -Property accountexpirationdate,lockedout,passwordexpired,passwordlastset,whencreated    
+    $script:UserProperties = get-aduser $Name -properties * | Select-Object -Property accountexpirationdate,lockedout,passwordexpired,passwordlastset,whencreated    
 }
     
 function Set-LockState
@@ -35,12 +47,12 @@ function Set-LockState
     }
 }
 
-function Set-PasswordState
-{
-    if ($UserProperties.passwordexpired -eq $true)
-    {
-        $NewPassword = Read-Host -Prompt "Please enter the new password" -AsSecureString
-        Set-ADAccountPassword $Name -NewPassword $NewPassword        
+function Set-Password
+{   
+    if ($UserProperties.passwordexpired -eq $false)
+    {   
+        Get-NewPassword
+        Set-ADAccountPassword $Name -NewPassword $ConfirmNewPassword            
     }    
 }
 
@@ -49,19 +61,19 @@ Clear-Host
 Do 
 {   
     $Name = Read-Host -Prompt "Please enter a username in the format first.name"
-    $doesntexist = $false
+    $DoesntExist = $false
     
     Try
-    {   
+    {   Write-Output $UserProperties
         Get-UserProperties $Name  | Set-LockState
-        Write-Output $UserProperties 
-        Get-UserProperties $Name | Set-PasswordState   
+         
+        Get-UserProperties $Name | Set-Password   
     }
     catch [Microsoft.ActiveDirectory.Management.ADIdentityNotFoundException],[Microsoft.ActiveDirectory.Management.Commands.GetADUser]
      {
       #Catches the exception errors for users that don't exist and provides the tech with a valid username to enter.
        Clear-Host
-       Get-ValidUser($Name)
+       Get-ValidUserName($Name)
        $DoesntExist = $True    
      }
 }

@@ -16,9 +16,9 @@ function Get-NewPassword
     Do 
     {
         $NewPassword = Read-Host -Prompt "Please enter the new password" -AsSecureString
-        $ConfirmNewPassword = Read-host -Prompt "Confirm new password" -AsSecureString
+        $script:ConfirmNewPassword = Read-host -Prompt "Confirm new password" -AsSecureString
         $NewPasswordText = [Runtime.InteropServices.Marshal]::PtrToStringAuto([Runtime.InteropServices.Marshal]::SecureStringToBSTR($NewPassword))
-        $script:ConfirmNewPasswordText = [Runtime.InteropServices.Marshal]::PtrToStringAuto([Runtime.InteropServices.Marshal]::SecureStringToBSTR($ConfirmNewPassword))
+        $ConfirmNewPasswordText = [Runtime.InteropServices.Marshal]::PtrToStringAuto([Runtime.InteropServices.Marshal]::SecureStringToBSTR($ConfirmNewPassword))
     
         if ($NewPasswordText -cne $ConfirmNewPasswordText)
         {
@@ -76,7 +76,7 @@ Do
      {
       #Catches the exception errors for users that don't exist and provides the tech with a valid username to enter.
        Clear-Host
-       Get-ValidUserName($Name)
+       Get-ValidUserName($Name) #| Get-UserProperties 
        $DoesntExist = $True
      }
 }

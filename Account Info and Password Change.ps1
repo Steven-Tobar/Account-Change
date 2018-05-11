@@ -12,16 +12,20 @@
 
 function Get-NewPassword
 {
-    $NewPassword = Read-Host -Prompt "Please enter the new password" -AsSecureString
-    $script:ConfirmNewPassword = Read-host -Prompt "Confirm new password" -AsSecureString
-    $NewPasswordText = [Runtime.InteropServices.Marshal]::PtrToStringAuto([Runtime.InteropServices.Marshal]::SecureStringToBSTR($NewPassword))
-    $ConfirmNewPasswordText = [Runtime.InteropServices.Marshal]::PtrToStringAuto([Runtime.InteropServices.Marshal]::SecureStringToBSTR($ConfirmNewPassword))
-    
-    if ($NewPasswordText -cne $ConfirmNewPasswordText)
+    $Matched = $false
+    Do 
     {
-        Write-Output "The New and Confirm password must match. Please re-enter them."
-    }  
+        $NewPassword = Read-Host -Prompt "Please enter the new password" -AsSecureString
+        $ConfirmNewPassword = Read-host -Prompt "Confirm new password" -AsSecureString
+        $NewPasswordText = [Runtime.InteropServices.Marshal]::PtrToStringAuto([Runtime.InteropServices.Marshal]::SecureStringToBSTR($NewPassword))
+        $script:ConfirmNewPasswordText = [Runtime.InteropServices.Marshal]::PtrToStringAuto([Runtime.InteropServices.Marshal]::SecureStringToBSTR($ConfirmNewPassword))
     
+        if ($NewPasswordText -cne $ConfirmNewPasswordText)
+        {
+            Write-Output "The New and Confirm password must match. Please re-enter them."
+            $matched = $True
+        }  
+    } while ($matched)
 }
 function Get-ValidUserName()
 {  
@@ -30,7 +34,7 @@ function Get-ValidUserName()
         [string]$script:Identity
     )    
         $FullName = $Identity.Replace("."," ")
-        $ValidUser = Get-ADUser -filter {name -eq $FullName} | Select-Object -expandproperty samaccountname
+        $script:ValidUser = Get-ADUser -filter {name -eq $FullName} | Select-Object -expandproperty samaccountname
         Write-Output "Their username is actually: $ValidUser `n"
 }
 
@@ -49,10 +53,10 @@ function Set-LockState
 
 function Set-Password
 {   
-    if ($UserProperties.passwordexpired -eq $false)
+    if ($UserProperties.passwordexpired -eq $true)
     {   
         Get-NewPassword
-        Set-ADAccountPassword $Name -NewPassword $ConfirmNewPassword            
+        Set-ADAccountPassword $Name -NewPassword $ConfirmNewPassword           
     }    
 }
 
@@ -65,8 +69,7 @@ Do
     
     Try
     {   Write-Output $UserProperties
-        Get-UserProperties $Name  | Set-LockState
-         
+        Get-UserProperties $Name | Set-LockState 
         Get-UserProperties $Name | Set-Password   
     }
     catch [Microsoft.ActiveDirectory.Management.ADIdentityNotFoundException],[Microsoft.ActiveDirectory.Management.Commands.GetADUser]
@@ -74,7 +77,7 @@ Do
       #Catches the exception errors for users that don't exist and provides the tech with a valid username to enter.
        Clear-Host
        Get-ValidUserName($Name)
-       $DoesntExist = $True    
+       $DoesntExist = $True
      }
 }
 

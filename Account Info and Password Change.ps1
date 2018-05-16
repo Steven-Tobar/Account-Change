@@ -40,6 +40,14 @@ function Get-ValidUserName()
 
 function Get-UserProperties()   
 {
+    [cmdletbinding()]
+    param
+    (
+        [parameter(Mandatory = $true,
+        ValueFromPipeline = $true)]
+        [String[]]
+        $Name
+    )
     $script:UserProperties = get-aduser $Name -properties * | Select-Object -Property accountexpirationdate,lockedout,passwordexpired,passwordlastset,whencreated    
 }
     

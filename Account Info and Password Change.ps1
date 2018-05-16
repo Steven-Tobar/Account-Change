@@ -31,10 +31,10 @@ function Get-ValidUserName()
 {  
     param
     ( 
-        [string]$script:Identity
+        [string]$Identity
     )    
         $FullName = $Identity.Replace("."," ")
-        $script:ValidUser = Get-ADUser -filter {name -eq $FullName} | Select-Object -expandproperty samaccountname
+        $ValidUser = Get-ADUser -filter {name -eq $FullName} | Select-Object -expandproperty samaccountname
         Write-Output "Their username is actually: $ValidUser `n"
 }
 
@@ -45,10 +45,9 @@ function Get-UserProperties()
     (
         [parameter(Mandatory = $true,
         ValueFromPipeline = $true)]
-        [String[]]
-        $Name
+        $Name    
     )
-    $script:UserProperties = get-aduser $Name -properties * | Select-Object -Property accountexpirationdate,lockedout,passwordexpired,passwordlastset,whencreated    
+    $script:UserProperties = get-aduser $Name -properties * | Select-Object -Property office, officephone, department, @{n = 'Manager';e={(Get-aduser $_.manager).Name}},lockedout,passwordexpired,passwordlastset,whencreated,accountexpirationdate | Format-List        
 }
     
 function Set-LockState
@@ -61,7 +60,7 @@ function Set-LockState
 
 function Set-Password
 {   
-    if ($UserProperties.passwordexpired -eq $false)
+    if ($UserProperties.passwordexpired -eq $true)
     {   
         Get-NewPassword | Set-ADAccountPassword $Name -NewPassword $ConfirmNewPassword
         Write-Output "The password has been reset."          

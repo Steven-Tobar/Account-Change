@@ -29,7 +29,7 @@ function Get-ValidUserName
     Do
     { 
         Try
-        {
+        {   Clear-Host
             $Real = $false  
             Write-Host "Format: firstname.lastname`n" -ForegroundColor Green 
             $Name = Read-Host -Prompt "Please enter a username"
@@ -37,13 +37,13 @@ function Get-ValidUserName
             $script:ValidUser = Get-ADUser -filter {name -eq $FullName} | Select-Object -expandproperty samaccountname
             Write-Output $ValidUser
         }
-        catch [Microsoft.ActiveDirectory.Management.ADIdentityNotFoundException],[Microsoft.ActiveDirectory.Management.Commands.GetADUser]
+        Catch [Microsoft.ActiveDirectory.Management.ADIdentityNotFoundException],[Microsoft.ActiveDirectory.Management.Commands.GetADUser]
         {
             Clear-Host  
             Write-Host "This user does not exist. `n"
             $Real = $true
         }
-        catch
+        Catch
         {
             Clear-host
             Write-Host "The prompt cannot be empty. Please enter a valid username. `n"

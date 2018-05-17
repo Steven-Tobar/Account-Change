@@ -8,6 +8,8 @@
 .NOTES
     Created by Steven Tobar 4/6/18
     Assumes a few things: Correct first and last name and no random jumble
+.Example
+
 #>
 
 function Get-NewPassword
@@ -27,15 +29,39 @@ function Get-NewPassword
         }  
     } while ($matched)
 }
-function Get-ValidUserName()
+
+function Get-ValidUserName
 {  
-    param
-    ( 
-        [string]$Identity
-    )    
-        $FullName = $Identity.Replace("."," ")
-        $ValidUser = Get-ADUser -filter {name -eq $FullName} | Select-Object -expandproperty samaccountname
-        Write-Output "Their username is actually: $ValidUser `n"
+    Do
+    { 
+        Try
+        {
+            $Real = $false  
+            Write-Host "Format: firstname.lastname`n" -ForegroundColor Green 
+            $Name = Read-Host -Prompt "Please enter a username"
+            $FullName = $Name.Replace("."," ")
+            $script:ValidUser = Get-ADUser -filter {name -eq $FullName} | Select-Object -expandproperty samaccountname
+            Write-Output $ValidUser
+        }
+        catch [Microsoft.ActiveDirectory.Management.ADIdentityNotFoundException],[Microsoft.ActiveDirectory.Management.Commands.GetADUser]
+        {
+            Clear-Host  
+            Write-Host "This user does not exist. `n"
+            $Real = $true
+        }
+        catch
+        {
+            Clear-host
+            Write-Host "The prompt cannot be empty. Please enter a valid username. `n"
+            $Real = $true
+        }
+    }  
+    While ($Real)      
+}
+
+function Read-UserProperties
+{
+    Write-Output $UserProperties
 }
 
 function Get-UserProperties()   
@@ -47,12 +73,20 @@ function Get-UserProperties()
         ValueFromPipeline = $true)]
         $Name    
     )
-    $script:UserProperties = get-aduser $Name -properties * | Select-Object -Property office, officephone, department, @{n = 'Manager';e={(Get-aduser $_.manager).Name}},lockedout,passwordexpired,passwordlastset,whencreated,accountexpirationdate | Format-List        
-}
-    
+    $script:UserProperties = get-aduser $Name -properties * | 
+    Select-Object @{n = 'Office'; e = {$_.office}},
+    @{n = 'Office Phone'; e = {$_.officephone}},
+    @{n = 'Department'; e = {$_.department}},
+    @{n = 'Manager'; e = {(Get-aduser $_.manager).Name}},
+    @{n = 'Account Locked Out'; e = {$_.lockedout}},
+    @{n = 'Password Expired' ; e = {$_.passwordexpired}},
+    @{n = 'Password Last Set'; e = {$_.passwordlastset}},
+    @{n = 'Account Creation Date' ; e = {$_.whencreated}},
+    @{n = 'Account Expiration Date'; e = {$_.accountexpirationdate}}
+}    
 function Set-LockState
 {  
-    if ($UserProperties.lockedout -eq $true)
+    if ($UserProperties.'Account Locked Out' -eq $true)
     {
         Unlock-ADAccount $Name -Confirm
     }
@@ -60,37 +94,18 @@ function Set-LockState
 
 function Set-Password
 {   
-    if ($UserProperties.passwordexpired -eq $true)
+    if ($UserProperties.'Password Expired' -eq $true)
     {   
         Get-NewPassword | Set-ADAccountPassword $Name -NewPassword $ConfirmNewPassword
         Write-Output "The password has been reset."          
     }    
 }
 
-Clear-Host
+Get-ValidUserName | Get-UserProperties
+Read-UserProperties
+Get-UserProperties $Name | Set-LockState 
+Get-UserProperties $Name | Set-Password 
 
-Do 
-{   
-    $Name = Read-Host -Prompt "Please enter a username in the format first.name"
-    $DoesntExist = $false
-    
-    Try
-    {   
-        Write-Output $UserProperties
-        Get-UserProperties $Name | Set-LockState 
-        Get-UserProperties $Name | Set-Password 
-          
-    }
-    catch [Microsoft.ActiveDirectory.Management.ADIdentityNotFoundException],[Microsoft.ActiveDirectory.Management.Commands.GetADUser]
-     {
-      #Catches the exception errors for users that don't exist and provides the tech with a valid username to enter.
-       Clear-Host
-       Get-ValidUserName $Name #| Get-UserProperties 
-       $DoesntExist = $True
-     }
-}
-
-while ($DoesntExist)
 
 
 

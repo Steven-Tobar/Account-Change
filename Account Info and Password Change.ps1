@@ -1,17 +1,12 @@
-﻿
-
-<#
+﻿<#
 .Synopsis
-   Gets the user's properties and allows the technician to make changes
+   Gets the user's properties and allows the technician to make changes to the password or lock state if needed
 .DESCRIPTION
    When given a username, the script will find the user's properties. If the account is locked out or if the password is expired, it'll prompt the tech to fix it. 
 .NOTES
     Created by Steven Tobar 4/6/18
-    Assumes a few things: Correct first and last name and no random jumble
-.Example
-
+    Assumes a few things: Correct first and last name and a legitimate name is used (i.e. 'John.Smith' and not 'cnweuiyf')
 #>
-
 function Get-NewPassword
 {
     $Matched = $false
@@ -29,7 +24,6 @@ function Get-NewPassword
         }  
     } while ($matched)
 }
-
 function Get-ValidUserName
 {  
     Do

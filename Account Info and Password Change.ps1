@@ -5,7 +5,7 @@
    When given a username, the script will find the user's properties. If the account is locked out or if the password is expired, it'll prompt the tech to fix it. 
 .NOTES
     Created by Steven Tobar 4/6/18
-    Assumes a few things: Correct first and last name and a legitimate name is used (i.e. 'John.Smith' and not 'cnweuiyf')
+    Assumes a few things: Correct first and last name and a legitimate name is used (i.e. 'John.Smith' and not 'cnwe.uiyf')
 #>
 function Get-NewPassword
 {
@@ -13,7 +13,7 @@ function Get-NewPassword
     Do 
     {
         $NewPassword = Read-Host -Prompt "Please enter the new password" -AsSecureString
-        $script:ConfirmNewPassword = Read-host -Prompt "Confirm new password" -AsSecureString
+        $ConfirmNewPassword = Read-host -Prompt "Confirm new password" -AsSecureString
         $NewPasswordText = [Runtime.InteropServices.Marshal]::PtrToStringAuto([Runtime.InteropServices.Marshal]::SecureStringToBSTR($NewPassword))
         $ConfirmNewPasswordText = [Runtime.InteropServices.Marshal]::PtrToStringAuto([Runtime.InteropServices.Marshal]::SecureStringToBSTR($ConfirmNewPassword))
     
@@ -60,12 +60,6 @@ function Get-ValidUserName
 }
 
 
-function Read-UserProperties
-{
-    Write-Output $UserProperties
-}
-
-
 function Get-UserProperties()   
 {
     [cmdletbinding()]
@@ -75,16 +69,17 @@ function Get-UserProperties()
         ValueFromPipeline = $true)]
         $Name    
     )
-    $script:UserProperties = get-aduser $Name -properties * | 
-    Select-Object @{n = 'Office'; e = {$_.office}},
-    @{n = 'Office Phone'; e = {$_.officephone}},
-    @{n = 'Department'; e = {$_.department}},
-    @{n = 'Manager'; e = {(Get-aduser $_.manager).Name}},
-    @{n = 'Account Locked Out'; e = {$_.lockedout}},
-    @{n = 'Password Expired' ; e = {$_.passwordexpired}},
-    @{n = 'Password Last Set'; e = {$_.passwordlastset}},
-    @{n = 'Account Creation Date' ; e = {$_.whencreated}},
-    @{n = 'Account Expiration Date'; e = {$_.accountexpirationdate}}
+    $UserProperties = get-aduser $Name -properties * | 
+    Select-Object   @{n = 'Office'; e = {$_.office}},
+                    @{n = 'Office Phone'; e = {$_.officephone}},
+                    @{n = 'Department'; e = {$_.department}},
+                    @{n = 'Manager'; e = {(Get-aduser $_.manager).Name}},
+                    @{n = 'Account Locked Out'; e = {$_.lockedout}},
+                    @{n = 'Password Expired' ; e = {$_.passwordexpired}},
+                    @{n = 'Password Last Set'; e = {$_.passwordlastset}},
+                    @{n = 'Account Creation Date' ; e = {$_.whencreated}},
+                    @{n = 'Account Expiration Date'; e = {$_.accountexpirationdate}}
+    Write-Output $UserProperties
 }    
 
 function Set-LockState
@@ -108,9 +103,8 @@ function Set-Password
 
 
 Get-ValidUserName | Get-UserProperties
-Read-UserProperties
-Get-UserProperties $ValidUser | Set-LockState 
-Get-UserProperties $ValidUser | Set-Password 
+Set-LockState 
+Set-Password 
 
 
 

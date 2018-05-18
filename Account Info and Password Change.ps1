@@ -69,7 +69,7 @@ function Get-UserProperties()
         ValueFromPipeline = $true)]
         $Name    
     )
-    $UserProperties = get-aduser $Name -properties * | 
+    $UserProperties = Get-aduser $ValidUser -properties * | 
     Select-Object   @{n = 'Office'; e = {$_.office}},
                     @{n = 'Office Phone'; e = {$_.officephone}},
                     @{n = 'Department'; e = {$_.department}},
@@ -102,7 +102,7 @@ function Set-Password
 }
 
 
-Get-ValidUserName | Get-UserProperties
+Get-ValidUserName | Get-UserProperties 
 Set-LockState 
 Set-Password 
 

@@ -6,6 +6,7 @@
 .NOTES
     Created by Steven Tobar 4/6/18
     Assumes a few things: Correct first and last name and a legitimate name is used (i.e. 'John.Smith' and not 'cnwe.uiyf')
+    Bugs: using firstinitial.lastname will not work.
 #>
 function Get-NewPassword
 {

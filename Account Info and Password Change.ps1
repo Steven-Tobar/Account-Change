@@ -13,17 +13,23 @@ function Get-NewPassword
     Do 
     {
         $NewPassword = Read-Host -Prompt "Please enter the new password" -AsSecureString
-        $ConfirmNewPassword = Read-host -Prompt "Confirm new password" -AsSecureString
+        $script:ConfirmNewPassword = Read-host -Prompt "Confirm new password" -AsSecureString
         $NewPasswordText = [Runtime.InteropServices.Marshal]::PtrToStringAuto([Runtime.InteropServices.Marshal]::SecureStringToBSTR($NewPassword))
         $ConfirmNewPasswordText = [Runtime.InteropServices.Marshal]::PtrToStringAuto([Runtime.InteropServices.Marshal]::SecureStringToBSTR($ConfirmNewPassword))
     
         if ($NewPasswordText -cne $ConfirmNewPasswordText)
-        {
-            Write-Output "The New and Confirm password must match. Please re-enter them."
+        {   
+            Write-Host "Both passwords must match. Please re-enter them. `n" -ForegroundColor Yellow
             $matched = $True
-        }  
+        } 
+        else 
+        {
+            Break
+        } 
     } while ($matched)
 }
+
+
 function Get-ValidUserName
 {  
     Do
@@ -31,7 +37,7 @@ function Get-ValidUserName
         Try
         {   Clear-Host
             $Real = $false  
-            Write-Host "Format: firstname.lastname`n" -ForegroundColor Green 
+            Write-Host "Format: firstname.lastname`n" -ForegroundColor Yellow 
             $Name = Read-Host -Prompt "Please enter a username"
             $FullName = $Name.Replace("."," ")
             $script:ValidUser = Get-ADUser -filter {name -eq $FullName} | Select-Object -expandproperty samaccountname
@@ -53,10 +59,12 @@ function Get-ValidUserName
     While ($Real)      
 }
 
+
 function Read-UserProperties
 {
     Write-Output $UserProperties
 }
+
 
 function Get-UserProperties()   
 {
@@ -78,27 +86,31 @@ function Get-UserProperties()
     @{n = 'Account Creation Date' ; e = {$_.whencreated}},
     @{n = 'Account Expiration Date'; e = {$_.accountexpirationdate}}
 }    
+
 function Set-LockState
 {  
     if ($UserProperties.'Account Locked Out' -eq $true)
     {
-        Unlock-ADAccount $Name -Confirm
+        Unlock-ADAccount $ValidUser -Confirm
     }
 }
 
+
 function Set-Password
 {   
-    if ($UserProperties.'Password Expired' -eq $true)
+    if ($UserProperties.'Password Expired' -eq $false)
     {   
-        Get-NewPassword | Set-ADAccountPassword $Name -NewPassword $ConfirmNewPassword
-        Write-Output "The password has been reset."          
+        Get-NewPassword
+        Set-ADAccountPassword $ValidUser -Reset -NewPassword $ConfirmNewPassword
+        Write-Host "The password has been reset. `n" -ForegroundColor Yellow          
     }    
 }
 
+
 Get-ValidUserName | Get-UserProperties
 Read-UserProperties
-Get-UserProperties $Name | Set-LockState 
-Get-UserProperties $Name | Set-Password 
+Get-UserProperties $ValidUser | Set-LockState 
+Get-UserProperties $ValidUser | Set-Password 
 
 
 

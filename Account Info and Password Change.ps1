@@ -32,7 +32,7 @@ function Get-ValidUserName
 {  
     Do
     {  
-        Write-Host "Format: firstname.lastname`n" -ForegroundColor Yellow 
+        Write-Host "Format: john.smith or jsmith`n" -ForegroundColor Yellow 
         $Name = Read-Host -Prompt "Please enter a username"
         $Real = $false 
 

@@ -5,8 +5,6 @@
    When given a username, the script will find the user's properties. If the account is locked out or if the password is expired, it'll prompt the tech to fix it. 
 .NOTES
     Created by Steven Tobar 4/6/18
-    Assumes a few things: Correct first and last name and a legitimate name is used (i.e. 'John.Smith' and not 'cnwe.uiyf')
-    Bugs: using firstinitial.lastname will not work.
 #>
 function Get-NewPassword
 {
@@ -30,18 +28,17 @@ function Get-NewPassword
     } while ($matched)
 }
 
-
 function Get-ValidUserName
 {  
     Do
-    { 
+    {  
+        Write-Host "Format: firstname.lastname`n" -ForegroundColor Yellow 
+        $Name = Read-Host -Prompt "Please enter a username"
+        $Real = $false 
+
         Try
-        {   Clear-Host
-            $Real = $false  
-            Write-Host "Format: firstname.lastname`n" -ForegroundColor Yellow 
-            $Name = Read-Host -Prompt "Please enter a username"
-            $FullName = $Name.Replace("."," ")
-            $script:ValidUser = Get-ADUser -filter {name -eq $FullName} | Select-Object -expandproperty samaccountname
+        {  
+            $script:ValidUser = Get-ADUser $Name | Select-Object -expandproperty samaccountname
             Write-Output $ValidUser
         }
         Catch [Microsoft.ActiveDirectory.Management.ADIdentityNotFoundException],[Microsoft.ActiveDirectory.Management.Commands.GetADUser]
@@ -68,9 +65,9 @@ function Get-UserProperties()
     (
         [parameter(Mandatory = $true,
         ValueFromPipeline = $true)]
-        $Name    
+        $Identity    
     )
-    $UserProperties = Get-aduser $ValidUser -properties * | 
+    $script:UserProperties = Get-aduser $Identity -properties * | 
     Select-Object   @{n = 'Office'; e = {$_.office}},
                     @{n = 'Office Phone'; e = {$_.officephone}},
                     @{n = 'Department'; e = {$_.department}},
@@ -85,7 +82,7 @@ function Get-UserProperties()
 
 function Set-LockState
 {  
-    if ($UserProperties.'Account Locked Out' -eq $true)
+    if ($UserProperties.'Account Locked Out' -eq $false)
     {
         Unlock-ADAccount $ValidUser -Confirm
     }
@@ -104,7 +101,7 @@ function Set-Password
 
 
 Get-ValidUserName | Get-UserProperties 
-Set-LockState 
+Set-LockState
 Set-Password 
 
 

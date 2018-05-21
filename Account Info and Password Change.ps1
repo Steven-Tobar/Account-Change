@@ -82,7 +82,7 @@ function Get-UserProperties()
 
 function Set-LockState
 {  
-    if ($UserProperties.'Account Locked Out' -eq $false)
+    if ($UserProperties.'Account Locked Out' -eq $true)
     {
         Unlock-ADAccount $ValidUser -Confirm
     }
@@ -91,7 +91,7 @@ function Set-LockState
 
 function Set-Password
 {   
-    if ($UserProperties.'Password Expired' -eq $false)
+    if ($UserProperties.'Password Expired' -eq $true)
     {   
         Get-NewPassword
         Set-ADAccountPassword $ValidUser -Reset -NewPassword $ConfirmNewPassword

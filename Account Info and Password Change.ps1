@@ -44,7 +44,7 @@ function Get-ValidUserName
         Catch [Microsoft.ActiveDirectory.Management.ADIdentityNotFoundException],[Microsoft.ActiveDirectory.Management.Commands.GetADUser]
         {
             Clear-Host  
-            Write-Host "This user does not exist. `n"
+            Write-Host "This user does not exist. `n" -ForegroundColor Red
             $Real = $true
         }
         Catch
@@ -60,13 +60,16 @@ function Get-ValidUserName
 
 function Get-UserProperties()   
 {
-    [cmdletbinding()]
     param
     (
-        [parameter(Mandatory = $true,
+        [parameter(
         ValueFromPipeline = $true)]
         $Identity    
     )
+    Begin{}
+    
+    Process
+    {
     $script:UserProperties = Get-aduser $Identity -properties * | 
     Select-Object   @{n = 'Office'; e = {$_.office}},
                     @{n = 'Office Phone'; e = {$_.officephone}},
@@ -77,7 +80,11 @@ function Get-UserProperties()
                     @{n = 'Password Last Set'; e = {$_.passwordlastset}},
                     @{n = 'Account Creation Date' ; e = {$_.whencreated}},
                     @{n = 'Account Expiration Date'; e = {$_.accountexpirationdate}}
-    Write-Output $UserProperties
+    }
+    End
+    {
+        Write-Output $UserProperties
+    }
 }    
 
 function Set-LockState
@@ -100,7 +107,7 @@ function Set-Password
 }
 
 
-Get-ValidUserName | Get-UserProperties 
+Get-ValidUserName | Get-UserProperties
 Set-LockState
 Set-Password 
 

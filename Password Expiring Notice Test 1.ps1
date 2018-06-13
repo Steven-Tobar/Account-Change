@@ -1,4 +1,4 @@
-$user  = get-aduser svc_ISEBackup -properties *
+$user  = get-aduser steven.tobar -properties *
 
 
 $x = $user.PasswordLastSet

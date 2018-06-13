@@ -91,6 +91,7 @@ function Set-LockState
 {  
     if ($UserProperties.'Account Locked Out' -eq $true)
     {
+        Write-Host "Unlocking the account. Please confirm." -ForegroundColor Yellow
         Unlock-ADAccount $ValidUser -Confirm
     }
 }
@@ -101,6 +102,7 @@ function Set-Password
     if ($UserProperties.'Password Expired' -eq $true)
     {   
         Get-NewPassword
+        Write-Host "Resetting the user password." -ForegroundColor Yellow
         Set-ADAccountPassword $ValidUser -Reset -NewPassword $ConfirmNewPassword
         Write-Host "The password has been reset. `n" -ForegroundColor Yellow          
     }    

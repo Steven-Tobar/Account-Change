@@ -7,10 +7,11 @@
     Created by Steven Tobar 4/6/18
 #>
 function Get-NewPassword
-{
+{ 
     $Matched = $false
-    Do 
-    {
+    Do  
+    {   #Asks for the tech to enter a new password and verifies that they're the same password before assigning it to the account.
+        #This will loop back if the passwords aren't the same.
         $NewPassword = Read-Host -Prompt "Please enter the new password" -AsSecureString
         $ConfirmNewPassword = Read-host -Prompt "Confirm new password" -AsSecureString
         $NewPasswordText = [Runtime.InteropServices.Marshal]::PtrToStringAuto([Runtime.InteropServices.Marshal]::SecureStringToBSTR($NewPassword))
@@ -31,7 +32,8 @@ function Get-NewPassword
 function Get-ValidUserName
 {  
     Do
-    {  
+    {  #Asks the tech to give a username in either format. A blanket "user does not exist" will show if the username is wrong or it actually can't be found and will loop back. 
+       #If the tech just presses enter, the error message should tell them that and loop back. Should.
         Write-Host "Format: john.smith or jsmith`n" -ForegroundColor Yellow 
         $Name = Read-Host -Prompt "Please enter a username"
         $Real = $false 
@@ -59,7 +61,7 @@ function Get-ValidUserName
 
 
 function Get-UserProperties()   
-{
+{ #Gets the user's properties via the custom properties in the hash table. There's probably a better way of doing this.
     param
     (
         [parameter(
@@ -88,7 +90,7 @@ function Get-UserProperties()
 }    
 
 function Set-LockState
-{  
+{  #Uses the properties from Get-UserProperties to check if the account is locked. If it is, it'll unlock it and tell the tech it's doing so.
     if ($UserProperties.'Account Locked Out' -eq $true)
     {
         Write-Host "Unlocking the account. Please confirm." -ForegroundColor Yellow
@@ -101,6 +103,7 @@ function Set-Password
 {   
     if ($UserProperties.'Password Expired' -eq $true)
     {   
+        #Uses the properties from Get-UserProperties to check if the password is expired. If it is, it'll call Get-NewPassword and reset the user's password.
         Get-NewPassword
         Write-Host "Resetting the user password." -ForegroundColor Yellow
         Set-ADAccountPassword $ValidUser -Reset -NewPassword $ConfirmNewPassword
@@ -110,13 +113,15 @@ function Set-Password
 
 $n = 0
 
-while ($n -lt 5) {
+while ($n -lt 5) 
+{
+    #Loops through the script a maximum of 5 times before the scripts stops. It will notify the tech of how many troes they have left.
     Get-ValidUserName | Get-UserProperties
     Set-LockState
     Set-Password   
     $n++
     $m = 5-$n
-    Write-Host "There are $m more tries left" -ForegroundColor Cyan
+    Write-Host "There are $m more account lookups left `n" -ForegroundColor Cyan
 }
 
 

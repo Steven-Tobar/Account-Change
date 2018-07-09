@@ -108,10 +108,17 @@ function Set-Password
     }    
 }
 
+$n = 0
 
-Get-ValidUserName | Get-UserProperties
-Set-LockState
-Set-Password 
+while ($n -lt 5) {
+    Get-ValidUserName | Get-UserProperties
+    Set-LockState
+    Set-Password   
+    $n++
+    $m = 5-$n
+    Write-Host "There are $m more tries left" -ForegroundColor Cyan
+}
+
 
 
 

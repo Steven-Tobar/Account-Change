@@ -1,14 +1,14 @@
 ﻿<#
 .Synopsis
-   Gets the user OUs.
+   Gets the user's distribution lists.
 
 .DESCRIPTION
-   Allows the tech to find if a user needs to be added to an OU for access to an application or security group.
+   Allows the tech to see which distribution list a user is apart of.
 
 .EXAMPLE
    Get-UserOU steven.tobar
 #>
-function Get-UserOU
+function Get-UserDistro
 {
     [CmdletBinding()]
     Param
@@ -32,4 +32,4 @@ function Get-UserOU
     }
 }
 
-Get-UserOU steven.tobar
+Get-UserDistro steven.tobar

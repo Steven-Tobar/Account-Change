@@ -3,10 +3,11 @@
    Gets the user's properties and allows the technician to make changes to the password or lock state if needed
 
 .DESCRIPTION
-   When given a username, the script will find the user's properties. If the account is locked out or if the password is expired, it'll prompt the tech to fix it. 
+   When given a username, the script will find the user's properties. If the account is locked out or if the password is expired, it'll prompt the tech to fix it.
 .NOTES
     Created by Steven Tobar 4/6/18
-#>function Get-NewPassword
+#>
+function Get-NewPassword
 {
     <#
     .Synopsis
@@ -20,7 +21,6 @@
     $Matched = $false
     Do
     {
-        #This will loop back if the passwords aren't the same.
         $NewPassword = Read-Host -Prompt "Please enter the new password" -AsSecureString
         $ConfirmNewPassword = Read-host -Prompt "Confirm new password" -AsSecureString
         $NewPasswordText = [Runtime.InteropServices.Marshal]::PtrToStringAuto([Runtime.InteropServices.Marshal]::SecureStringToBSTR($NewPassword))
@@ -52,9 +52,9 @@ function Get-ValidUserName
 
     Do
     {
-        Write-Host "Format: john.smith or jsmith`n" -ForegroundColor Yellow 
+        Write-Host "Format: john.smith or jsmith`n" -ForegroundColor Yellow
         $Name = Read-Host -Prompt "Please enter a username"
-        $Real = $false 
+        $Real = $false
 
         Try
         {
@@ -63,7 +63,7 @@ function Get-ValidUserName
         }
         Catch [Microsoft.ActiveDirectory.Management.ADIdentityNotFoundException],[Microsoft.ActiveDirectory.Management.Commands.GetADUser]
         {
-            Clear-Host  
+            Clear-Host
             Write-Host "This user does not exist. `n" -ForegroundColor Red
             $Real = $true
         }
@@ -87,7 +87,6 @@ function Get-UserProperties()
     .DESCRIPTION
     The command will generate a custom hash table showcasing vital information for the tech.
     #>
-
 
     param
     (
@@ -142,7 +141,7 @@ function Set-Password
     .DESCRIPTION
     Uses the properties from Get-UserProperties to check if the password is expired. If it is, it'll call Get-NewPassword and reset the user's password.
     #>
-    
+
     if ($UserProperties.'Password Expired' -eq $true)
     {
         Get-NewPassword

@@ -106,6 +106,7 @@ function Get-UserProperties()
                     @{n = 'Account Locked Out'; e = {$_.lockedout}},
                     @{n = 'Password Expired' ; e = {$_.passwordexpired}},
                     @{n = 'Password Last Set'; e = {$_.passwordlastset}},
+                    @{n = 'Last Bad Password Attempt'; e = {$_.lastbadpasswordattempt}},
                     @{n = 'Account Creation Date' ; e = {$_.whencreated}},
                     @{n = 'Account Expiration Date'; e = {$_.accountexpirationdate}}
     }

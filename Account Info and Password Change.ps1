@@ -59,7 +59,7 @@ function Get-ValidUserName
         Try
         {
             $script:ValidUser = Get-ADUser $Name | Select-Object -expandproperty samaccountname
-            Write-Output $ValidUser
+            Write-Output $script:ValidUser
         }
         Catch [Microsoft.ActiveDirectory.Management.ADIdentityNotFoundException],[Microsoft.ActiveDirectory.Management.Commands.GetADUser]
         {
@@ -111,7 +111,7 @@ function Get-UserProperties()
                     @{n = 'Account Expiration Date'; e = {$_.accountexpirationdate}}
     }
     End
-    {
+    { 
         Write-Output $UserProperties
     }
 }
@@ -149,8 +149,15 @@ function Set-Password
         Write-Host "Resetting the user password." -ForegroundColor Yellow
         Set-ADAccountPassword $ValidUser -Reset -NewPassword $ConfirmNewPassword
         Write-Host "The password has been reset. `n" -ForegroundColor Yellow
+        Set-PasswordLog
     }
 }
+function Set-PasswordLog
+{
+    $UserProperties | Export-Csv C:\LogTest.csv -NoTypeInformation
+}
+
+
 
 $n = 0
 

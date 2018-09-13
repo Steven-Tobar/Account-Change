@@ -6,46 +6,46 @@ Function Get-ComputerName
 
 if ($Location -eq "T")
 {
-    $FIBTemplate = "TRLUSNYFIB-"
+    $FTemplate = "ComputerName-"
    
-    #starting at 1000 for the computer names since it's at like 1040 right now. It'll give us a buffer before we think of a better way of doing this
-    $FIB = Get-ADComputer -filter 'Name -like "TRLUSNYFIB-1*"' -SearchBase "OU=Laptops,OU=_Machines,DC=newyork,DC=hbpub,DC=net" | select name | sort name
     
-    $LastComputerFIB = $FIB[-1].name
+    $F = Get-ADComputer -filter 'Name -like "ComputerName-1*"' -SearchBase "$ComputerOU" | select name | sort name
     
-    [int]$DigitsFIB = $LastComputerFIB.substring($LastComputerFIB.lastindexof("-")+1)
-    #Takes the last 4 digits of the computer name from the last computer in FIB with the name TRLUSNYFIB-1XXX and spits out the digits "1XXX". 
+    $LastComputerF = $F[-1].name
     
-    $DigitsFIB += 1
+    [int]$DigitsF = $LastComputerF.substring($LastComputerF.lastindexof("-")+1)
+    #Takes the last 4 digits of the computer name from the last computer in F with the name ComputerName-1XXX and spits out the digits "1XXX". 
+    
+    $DigitsF += 1
 
-    $NewFIBComputerName = -join($FIBTemplate,$DigitsFIB)
+    $NewFComputerName = -join($FTemplate,$DigitsF)
     
-    Write-Output $NewFIBComputerName    
+    Write-Output $NewFComputerName    
 }
 elseif($Location -eq "L")
 {
-    $NYPTemplate = "TRLUSNYNYP-"
+    $NTemplate = "ComputerName-"
     
-    $NYP = Get-ADComputer -filter 'Name -like "TRLUSNYNYP-0*"' -SearchBase "OU=Laptops,OU=_Machines,DC=newyork,DC=hbpub,DC=net" | select name | sort name
+    $N = Get-ADComputer -filter 'Name -like "ComputerName-0*"' -SearchBase "$ComputerOU" | select name | sort name
     
-    $LastComputerNYP = $NYP[-1].name
+    $LastComputerN = $N[-1].name
     
-    [int]$DigitsNYP = $LastComputerNYP.substring($LastComputerNYP.lastindexof("-")+1)
-    #Takes the last 4 digits of the computer name from the last computer in FIB with the name TRLUSNYFIB-1XXX and spits out the digits "1XXX". 
+    [int]$DigitsN = $LastComputerN.substring($LastComputerN.lastindexof("-")+1)
+    #Takes the last 4 digits of the computer name from the last computer in N with the name Computer-0XXX and spits out the digits "1XXX". 
     
     $DigitsNYP += 1
 
-    $NewNYPComputerName = -join($NYPTemplate,$DigitsNYP)
+    $NewNYPComputerName = -join($NTemplate,$DigitsN)
 
-    Write-Output $NewNYPComputerName
+    Write-Output $NewNComputerName
 }
 
 }
 
 Function Add-Computer
 {
-    
-    Add-Computer -credential (get-credential) -DomainName NewYork.HBPub.net -ComputerName $env:computername -NewName $NewComputerName -OUPath "OU=Laptops,OU=_Machines,DC=newyork,DC=hbpub,DC=net" -PassThru -Restart
+
+    Add-Computer -credential (get-credential) -DomainName $CompanyDomain -ComputerName $env:computername -NewName $NewComputerName -OUPath $CompanyOU -PassThru -Restart
 }
 
 Get-computername | Add-Computer

@@ -35,7 +35,7 @@ elseif($Location -eq "L")
     
     $DigitsNYP += 1
 
-    $NewNYPComputerName = -join($NTemplate,$DigitsN)
+    $NewNComputerName = -join($NTemplate,$DigitsN)
 
     Write-Output $NewNComputerName
 }

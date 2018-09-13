@@ -9,7 +9,7 @@ if ($Location -eq "T")
     $FTemplate = "ComputerName-"
    
     
-    $F = Get-ADComputer -filter 'Name -like "ComputerName-1*"' -SearchBase "$ComputerOU" | select name | sort name
+    $F = Get-ADComputer -filter 'Name -like "ComputerName-1*"' -SearchBase "$ComputerOU" | Select-Object name | Sort-Object name
     
     $LastComputerF = $F[-1].name
     
@@ -26,7 +26,7 @@ elseif($Location -eq "L")
 {
     $NTemplate = "ComputerName-"
     
-    $N = Get-ADComputer -filter 'Name -like "ComputerName-0*"' -SearchBase "$ComputerOU" | select name | sort name
+    $N = Get-ADComputer -filter 'Name -like "ComputerName-0*"' -SearchBase "$ComputerOU" | Select-Object name | Sort-Object name
     
     $LastComputerN = $N[-1].name
     

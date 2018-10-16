@@ -82,10 +82,10 @@ function Get-UserProperties()
 {
     <#
     .SYNOPSIS
-    Gets the user's properties via the custom properties in the hash table. There's probably a better way of doing this.
+    Gets the user's properties and displays them to the tech.
 
     .DESCRIPTION
-    The command will generate a custom hash table showcasing vital information for the tech.
+    The command will generate a pscustomobject showcasing vital information about the user to help troubleshoot account related issues.
     #>
 
     param
@@ -95,24 +95,24 @@ function Get-UserProperties()
         $Identity
     )
     Begin{}
-
     Process
     {
-    $script:UserProperties = Get-aduser $Identity -properties * |
-    Select-Object   @{n = 'Office'; e = {$_.office}},
-                    @{n = 'Office Phone'; e = {$_.officephone}},
-                    @{n = 'Department'; e = {$_.department}},
-                    @{n = 'Manager'; e = {(Get-aduser $_.manager).Name}},
-                    @{n = 'Account Locked Out'; e = {$_.lockedout}},
-                    @{n = 'Password Expired' ; e = {$_.passwordexpired}},
-                    @{n = 'Password Last Set'; e = {$_.passwordlastset}},
-                    @{n = 'Last Bad Password Attempt'; e = {$_.lastbadpasswordattempt}},
-                    @{n = 'Account Creation Date' ; e = {$_.whencreated}},
-                    @{n = 'Account Expiration Date'; e = {$_.accountexpirationdate}}
+        $script:UserProperties = Get-aduser $Identity -properties *
+        $UserPropertiesObject = [PSCustomObject]@{
+            Office = $UserProperties.Office
+            'Office Phone' = $UserProperties.OfficePhone
+            Department = $UserProperties.Department
+            Manager = (get-aduser $UserProperties.Manager).Name
+            'Account Locked Out' = $UserProperties.LockedOut
+            'Password Expired' = $UserProperties.PasswordExpired
+            'Last Bad Password Attempt' = $UserProperties.LastBadPasswordAttempt
+            'Account Creation Date' = $UserProperties.whenCreated
+            'Account Expiration Date' = $UserProperties.AccountExpirationDate 
+        }
     }
     End
     { 
-        Write-Output $UserProperties
+        Write-Output $UserPropertiesObject
     }
 }
 

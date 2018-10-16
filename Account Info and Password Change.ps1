@@ -104,6 +104,7 @@ function Get-UserProperties()
             Department = $UserProperties.Department
             Manager = (get-aduser $UserProperties.Manager).Name
             'Account Locked Out' = $UserProperties.LockedOut
+            'Password Last Set' = $UserProperties.passwordlastset
             'Password Expired' = $UserProperties.PasswordExpired
             'Last Bad Password Attempt' = $UserProperties.LastBadPasswordAttempt
             'Account Creation Date' = $UserProperties.whenCreated
@@ -149,7 +150,7 @@ function Set-Password
         Write-Host "Resetting the user password." -ForegroundColor Yellow
         Set-ADAccountPassword $ValidUser -Reset -NewPassword $ConfirmNewPassword
         Write-Host "The password has been reset. `n" -ForegroundColor Yellow
-        Set-PasswordLog
+        #Set-PasswordLog
     }
 }
 function Set-PasswordLog

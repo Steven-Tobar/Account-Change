@@ -14,7 +14,8 @@ if ($Location -eq "T")
     $LastComputerF = $F[-1].name
     
     [int]$DigitsF = $LastComputerF.substring($LastComputerF.lastindexof("-")+1)
-    #Takes the last 4 digits of the computer name from the last computer in F with the name ComputerName-1XXX and spits out the digits "1XXX". 
+    #Takes the last 4 digits of the computer name from the last computer in $F with the name ComputerName-1XXX and spits out the digits "1XXX". 
+    #The "$LastComputerF.lastindexof("-")+1" is basically finding the last time in the string '-' appears, adding a 1 so it starts after the '-' (i.e. at the "1" in 1XXX), and returning everything after the '-' 
     
     $DigitsF += 1
 

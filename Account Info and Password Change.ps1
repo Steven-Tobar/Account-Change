@@ -97,8 +97,8 @@ function Get-UserProperties()
     Begin{}
     Process
     {
-        $script:UserProperties = Get-aduser $Identity -properties *
-        $UserPropertiesObject = [PSCustomObject]@{
+        $UserProperties = Get-aduser $Identity -properties *
+        $script:UserPropertiesObject = [PSCustomObject]@{
             Office = $UserProperties.Office
             'Office Phone' = $UserProperties.OfficePhone
             Department = $UserProperties.Department
@@ -126,7 +126,7 @@ function Set-LockState
     .DESCRIPTION
     The command uses the properties from Get-UserProperties to check if the account is locked. If it is, it'll unlock it and tell the tech it's doing so.
     #>
-    if ($UserProperties.'Account Locked Out' -eq $true)
+    if ($UserPropertiesObject.'Account Locked Out' -eq $true)
     {
         Write-Host "Unlocking the account. Please confirm." -ForegroundColor Yellow
         Unlock-ADAccount $ValidUser -Confirm
@@ -144,7 +144,7 @@ function Set-Password
     Uses the properties from Get-UserProperties to check if the password is expired. If it is, it'll call Get-NewPassword and reset the user's password.
     #>
 
-    if ($UserProperties.'Password Expired' -eq $true)
+    if ($UserPropertiesObject.'Password Expired' -eq $true)
     {
         Get-NewPassword
         Write-Host "Resetting the user password." -ForegroundColor Yellow
